@@ -32,8 +32,8 @@ functions:
           - - "https://"
             - Ref: ApiGatewayRestApi
             - ".execute-api.${opt:region}.amazonaws.com/${opt:stage}/restaurants"
-      cognito_user_pool_id: us-east-1_16bnZr2X5
-      cognito_client_id: 46ncuhiaq0ijf905ljek5toekb
+      cognito_user_pool_id: ${ssm:/workshop-yancui/dev/cognito_user_pool_id}
+      cognito_client_id: ${ssm:/workshop-yancui/dev/cognito_web_client_id}
 
   get-restaurants:
     handler: functions/get-restaurants.handler
@@ -43,7 +43,7 @@ functions:
           method: get
           authorizer: aws_iam
     environment:
-      restaurants_table: restaurants-yancui
+      restaurants_table: ${ssm:/workshop-yancui/dev/table_name}
 
   search-restaurants:
     handler: functions/search-restaurants.handler
@@ -54,14 +54,14 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/us-east-1_16bnZr2X5
     environment:
-      restaurants_table: restaurants-yancui
+      restaurants_table: ${ssm:/workshop-yancui/dev/table_name}
 
 resources:
   Resources:
     restaurantsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: restaurants-yancui
+        TableName: ${ssm:/workshop-yancui/dev/table_name}
         AttributeDefinitions:
           - AttributeName: name
             AttributeType: S
