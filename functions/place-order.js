@@ -1,7 +1,8 @@
-const _          = require('lodash')
-const AWS        = require('aws-sdk')
-const kinesis    = new AWS.Kinesis()
-const chance     = require('chance').Chance()
+const _ = require('lodash')
+const AWS = require('aws-sdk')
+const kinesis = new AWS.Kinesis()
+const chance = require('chance').Chance()
+const Log = require('../lib/log')
 const streamName = process.env.order_events_stream
 
 const UNAUTHORIZED = {
@@ -14,12 +15,12 @@ module.exports.handler = async (event, context) => {
 
   const userEmail = _.get(event, 'requestContext.authorizer.claims.email')
   if (!userEmail) {
-    console.error('user email is not found')
+    Log.error('user email is not found')
     return UNAUTHORIZED
   }
 
   const orderId = chance.guid()
-  console.log(`placing order ID [${orderId}] to [${restaurantName}] for user [${userEmail}]`)
+  Log.debug(`placing order ID [${orderId}] to [${restaurantName}] for user [${userEmail}]`)
 
   const data = {
     orderId,
@@ -36,7 +37,7 @@ module.exports.handler = async (event, context) => {
 
   await kinesis.putRecord(req).promise()
 
-  console.log(`published 'order_placed' event into Kinesis`)
+  Log.debug(`published 'order_placed' event into Kinesis`)
 
   const response = {
     statusCode: 200,

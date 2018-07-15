@@ -1,6 +1,7 @@
 const { getRecords } = require('../lib/kinesis')
 const notify = require('../lib/notify')
 const retry = require('../lib/retry')
+const Log = require('../lib/log')
 
 module.exports.handler = async (event, context) => {
   const records = getRecords(event)
@@ -10,7 +11,7 @@ module.exports.handler = async (event, context) => {
     try {
       await notify.restaurantOfOrder(order)
     } catch (err) {
-      console.log(`failed to notify restaurant of order [${order.orderId}], queuing for retry...`)
+      Log.warn(`failed to notify restaurant of order [${order.orderId}], queuing for retry...`)
       await retry.restaurantNotification(order)
     }
   }

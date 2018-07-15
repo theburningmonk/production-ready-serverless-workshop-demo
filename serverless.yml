@@ -4,9 +4,16 @@ plugins:
   - serverless-pseudo-parameters
   - serverless-iam-roles-per-function
 
+custom:
+  logLevel:
+    prod: INFO
+    default: DEBUG
+
 provider:
   name: aws
   runtime: nodejs8.10
+  environment:
+    log_level: ${self:custom.logLevel.${opt:stage}, self:custom.logLevel.default}
 
 functions:
   get-index:
