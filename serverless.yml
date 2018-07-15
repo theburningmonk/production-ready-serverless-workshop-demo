@@ -23,6 +23,10 @@ provider:
         Fn::GetAtt:
           - orderEventsStream
           - Arn
+    - Effect: Allow
+      Action: sns:Publish
+      Resource: 
+        Ref: restaurantNotificationTopic
 
 functions:
   get-index:
@@ -79,6 +83,20 @@ functions:
     environment:
       order_events_stream: ${ssm:/workshop-yancui/dev/stream_name}
 
+  notify-restaurant:
+    handler: functions/notify-restaurant.handler
+    events:
+      - stream:
+          type: kinesis
+          arn: 
+            Fn::GetAtt:
+              - orderEventsStream
+              - Arn
+    environment:
+      order_events_stream: ${ssm:/workshop-yancui/dev/stream_name}
+      restaurant_notification_topic: 
+        Ref: restaurantNotificationTopic
+
 resources:
   Resources:
     restaurantsTable:
@@ -100,3 +118,9 @@ resources:
       Properties: 
         Name: ${ssm:/workshop-yancui/dev/stream_name}
         ShardCount: 1
+
+    restaurantNotificationTopic:
+      Type: AWS::SNS::Topic
+      Properties: 
+        DisplayName: ${ssm:/workshop-yancui/dev/restaurant_topic_name}
+        TopicName: ${ssm:/workshop-yancui/dev/restaurant_topic_name}
