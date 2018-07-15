@@ -19,6 +19,7 @@ describe('Given an authenticated user', () => {
 
   describe(`When we invoke the POST /orders endpoint`, () => {
     let isEventPublished = false
+    let resp
 
     before(async () => {
       AWS.mock('Kinesis', 'putRecord', (req) => {
@@ -30,18 +31,20 @@ describe('Given an authenticated user', () => {
           promise: async () => {}
         }
       })
+
+      resp = await when.we_invoke_place_order(user, 'Fangtasia')
     })
 
     after(() => AWS.restore('Kinesis', 'putRecord'))
-  
-    it(`Should publish a message to Kinesis stream and return 200`, async () => {
-      const res = await when.we_invoke_place_order(user, 'Fangtasia')
-  
-      expect(res.statusCode).to.equal(200)
 
-      if (process.env.TEST_MODE === 'handler') {
-        expect(isEventPublished).to.be.true
-      }
+    it(`Should return 200`, async () => {
+      expect(resp.statusCode).to.equal(200)
     })
+  
+    if (process.env.TEST_MODE === 'handler') {
+      it(`Should publish a message to Kinesis stream`, async () => {
+        expect(isEventPublished).to.be.true
+      })
+    }
   })
 })
