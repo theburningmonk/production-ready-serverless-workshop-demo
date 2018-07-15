@@ -17,6 +17,12 @@ provider:
     - Effect: Allow
       Action: execute-api:Invoke
       Resource: arn:aws:execute-api:#{AWS::Region}:#{AWS::AccountId}:*/*/GET/restaurants
+    - Effect: Allow
+      Action: kinesis:PutRecord
+      Resource: 
+        Fn::GetAtt:
+          - orderEventsStream
+          - Arn
 
 functions:
   get-index:
@@ -56,6 +62,17 @@ functions:
     environment:
       restaurants_table: ${ssm:/workshop-yancui/dev/table_name}
 
+  place-order:
+    handler: functions/place-order.handler
+    events:
+      - http:
+          path: /orders
+          method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/${ssm:/workshop-yancui/dev/cognito_user_pool_id}
+    environment:
+      order_events_stream: ${ssm:/workshop-yancui/dev/stream_name}
+
 resources:
   Resources:
     restaurantsTable:
@@ -71,3 +88,9 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+    orderEventsStream:
+      Type: AWS::Kinesis::Stream
+      Properties: 
+        Name: ${ssm:/workshop-yancui/dev/stream_name}
+        ShardCount: 1
