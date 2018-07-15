@@ -2,33 +2,11 @@ service: workshop-yancui
 
 plugins:
   - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
   runtime: nodejs8.10
-
-  iamRoleStatements:
-    - Effect: Allow
-      Action: dynamodb:scan
-      Resource:
-        Fn::GetAtt:
-          - restaurantsTable
-          - Arn
-    - Effect: Allow
-      Action: execute-api:Invoke
-      Resource: arn:aws:execute-api:#{AWS::Region}:#{AWS::AccountId}:*/*/GET/restaurants
-    - Effect: Allow
-      Action: kinesis:PutRecord
-      Resource: 
-        Fn::GetAtt:
-          - orderEventsStream
-          - Arn
-    - Effect: Allow
-      Action: sns:Publish
-      Resource: 
-        - Ref: restaurantNotificationTopic
-        - Ref: restaurantNotificationRetryTopic
-        - Ref: restaurantNotificationDLQTopic
 
 functions:
   get-index:
@@ -52,6 +30,10 @@ functions:
             - ".execute-api.${opt:region}.amazonaws.com/${opt:stage}/orders"
       cognito_user_pool_id: ${ssm:/workshop-yancui/dev/cognito_user_pool_id}
       cognito_client_id: ${ssm:/workshop-yancui/dev/cognito_web_client_id}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: execute-api:Invoke
+        Resource: arn:aws:execute-api:#{AWS::Region}:#{AWS::AccountId}:*/*/GET/restaurants
 
   get-restaurants:
     handler: functions/get-restaurants.handler
@@ -62,6 +44,13 @@ functions:
           authorizer: aws_iam
     environment:
       restaurants_table: ${ssm:/workshop-yancui/dev/table_name}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:scan
+        Resource:
+          Fn::GetAtt:
+            - restaurantsTable
+            - Arn
 
   search-restaurants:
     handler: functions/search-restaurants.handler
@@ -73,6 +62,13 @@ functions:
             arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/${ssm:/workshop-yancui/dev/cognito_user_pool_id}
     environment:
       restaurants_table: ${ssm:/workshop-yancui/dev/table_name}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:scan
+        Resource:
+          Fn::GetAtt:
+            - restaurantsTable
+            - Arn
 
   place-order:
     handler: functions/place-order.handler
@@ -84,6 +80,13 @@ functions:
             arn: arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/${ssm:/workshop-yancui/dev/cognito_user_pool_id}
     environment:
       order_events_stream: ${ssm:/workshop-yancui/dev/stream_name}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource: 
+          Fn::GetAtt:
+            - orderEventsStream
+            - Arn
 
   notify-restaurant:
     handler: functions/notify-restaurant.handler
@@ -100,6 +103,18 @@ functions:
         Ref: restaurantNotificationTopic
       restaurant_notification_retry_topic: 
         Ref: restaurantNotificationRetryTopic
+    iamRoleStatements:
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource: 
+          Fn::GetAtt:
+            - orderEventsStream
+            - Arn
+      - Effect: Allow
+        Action: sns:Publish
+        Resource: 
+          - Ref: restaurantNotificationTopic
+          - Ref: restaurantNotificationRetryTopic
   
   retry-notify-restaurant:
     handler: functions/retry-notify-restaurant.handler
@@ -114,6 +129,18 @@ functions:
         Ref: restaurantNotificationTopic
     onError: 
       Ref: restaurantNotificationDLQTopic
+    iamRoleStatements:
+      - Effect: Allow
+        Action: kinesis:PutRecord
+        Resource: 
+          Fn::GetAtt:
+            - orderEventsStream
+            - Arn
+      - Effect: Allow
+        Action: sns:Publish
+        Resource: 
+          - Ref: restaurantNotificationTopic
+          - Ref: restaurantNotificationDLQTopic
 
 resources:
   Resources:
