@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "sls": "serverless",
-    "test": "TEST_MODE=handler ./node_modules/.bin/mocha tests/test_cases --reporter spec",
-    "acceptance": "TEST_MODE=http ./node_modules/.bin/mocha tests/test_cases --reporter spec"
+    "test": "TEST_MODE=handler ./node_modules/.bin/mocha tests/test_cases --reporter spec --timeout 5000",
+    "acceptance": "TEST_MODE=http ./node_modules/.bin/mocha tests/test_cases --reporter spec --timeout 5000"
   },
   "author": "",
   "license": "ISC",
