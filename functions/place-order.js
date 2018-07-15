@@ -13,7 +13,8 @@ module.exports.handler = async (event, context) => {
   const restaurantName = JSON.parse(event.body).restaurantName
 
   const userEmail = _.get(event, 'requestContext.authorizer.claims.email')
-  if (!userEmail) {    
+  if (!userEmail) {
+    console.error('user email is not found')
     return UNAUTHORIZED
   }
 

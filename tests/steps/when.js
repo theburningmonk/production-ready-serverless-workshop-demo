@@ -117,8 +117,28 @@ const we_invoke_search_restaurants = async (user, theme) => {
   return res
 }
 
+const we_invoke_place_order = async (user, restaurantName) => {
+  const body = JSON.stringify({ restaurantName })
+  const requestContext = {
+    authorizer: {
+      claims: {
+        email: `${user.username}@test.com`
+      }
+    }
+  }
+  const auth = user.idToken
+
+  const res = 
+    mode === 'handler'
+      ? await viaHandler({ body, requestContext }, 'place-order')
+      : await viaHttp('orders', 'POST', { body, auth })
+  
+  return res
+}
+
 module.exports = {
   we_invoke_get_index,
   we_invoke_get_restaurants,
-  we_invoke_search_restaurants
+  we_invoke_search_restaurants,
+  we_invoke_place_order
 }
