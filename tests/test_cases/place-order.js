@@ -19,7 +19,7 @@ describe('Given an authenticated user', () => {
 
   describe(`When we invoke the POST /orders endpoint`, () => {
     let isEventPublished = false
-  
+
     before(async () => {
       AWS.mock('Kinesis', 'putRecord', (req) => {
         isEventPublished = 
@@ -38,7 +38,10 @@ describe('Given an authenticated user', () => {
       const res = await when.we_invoke_place_order(user, 'Fangtasia')
   
       expect(res.statusCode).to.equal(200)
-      expect(isEventPublished).to.be.true
+
+      if (process.env.TEST_MODE === 'handler') {
+        expect(isEventPublished).to.be.true
+      }
     })
   })
 })
