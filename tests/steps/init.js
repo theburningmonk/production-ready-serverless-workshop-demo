@@ -46,6 +46,7 @@ const init = async () => {
   process.env.cognito_server_client_id = params.cognito_server_client_id
   process.env.order_events_stream      = params.stream_name
   process.env.restaurant_notification_topic = params.restaurant_topic_name
+  process.env.failure_rate             = 0
   
   const { credentials } = await promisify(awscred.load)()
   
