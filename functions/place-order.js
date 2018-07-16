@@ -1,6 +1,8 @@
 const _ = require('lodash')
-const AWSXRay = require('aws-xray-sdk');
-const AWS = AWSXRay.captureAWS(require('aws-sdk'))
+const AWSXRay = require('aws-xray-sdk-core');
+const AWS = process.env.LAMBDA_RUNTIME_DIR
+  ? AWSXRay.captureAWS(require('aws-sdk'))
+  : require('aws-sdk')
 const kinesis = new AWS.Kinesis()
 const chance = require('chance').Chance()
 const Log = require('../lib/log')

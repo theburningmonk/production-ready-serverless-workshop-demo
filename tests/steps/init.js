@@ -47,6 +47,7 @@ const init = async () => {
   process.env.order_events_stream      = params.stream_name
   process.env.restaurant_notification_topic = params.restaurant_topic_name
   process.env.failure_rate             = 0
+  process.env.AWS_XRAY_CONTEXT_MISSING = "LOG_ERROR"
   
   const { credentials } = await promisify(awscred.load)()
   
