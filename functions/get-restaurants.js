@@ -1,4 +1,5 @@
-const AWS = require('aws-sdk')
+const AWSXRay = require('aws-xray-sdk')
+const AWS = AWSXRay.captureAWS(require('aws-sdk'))
 const dynamodb = new AWS.DynamoDB.DocumentClient()
 const wrap = require('../lib/wrapper')
 

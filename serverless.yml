@@ -3,17 +3,28 @@ service: workshop-yancui
 plugins:
   - serverless-pseudo-parameters
   - serverless-iam-roles-per-function
+  - serverless-plugin-tracing
 
 custom:
   logLevel:
     prod: INFO
     default: DEBUG
+  serverless-iam-roles-per-function:
+    defaultInherit: true
 
 provider:
   name: aws
   runtime: nodejs8.10
+  tracing: true
   environment:
     log_level: ${self:custom.logLevel.${opt:stage}, self:custom.logLevel.default}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+      Resource:
+        - "*"
 
 functions:
   get-index:
