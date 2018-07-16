@@ -4,6 +4,7 @@ const http = require('superagent-promise')(require('superagent'), Promise)
 const aws4 = require('aws4')
 const URL = require('url')
 const Log = require('../lib/log')
+const wrap = require('../lib/wrapper')
 
 const restaurantsApiRoot = process.env.restaurants_api
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -47,7 +48,7 @@ const getRestaurants = async () => {
   return (await httpReq).body
 }
 
-module.exports.handler = async (event, context) => {
+module.exports.handler = wrap(async (event, context) => {
   const template = loadHtml()
   const restaurants = await getRestaurants()
   const dayOfWeek = days[new Date().getDay()]
@@ -70,4 +71,4 @@ module.exports.handler = async (event, context) => {
   }
 
   return response
-}
+})

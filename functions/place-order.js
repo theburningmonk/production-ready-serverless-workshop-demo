@@ -3,6 +3,7 @@ const AWS = require('aws-sdk')
 const kinesis = new AWS.Kinesis()
 const chance = require('chance').Chance()
 const Log = require('../lib/log')
+const wrap = require('../lib/wrapper')
 const streamName = process.env.order_events_stream
 
 const UNAUTHORIZED = {
@@ -10,7 +11,7 @@ const UNAUTHORIZED = {
   body: "unauthorized"
 }
 
-module.exports.handler = async (event, context) => {
+module.exports.handler = wrap(async (event, context) => {
   const restaurantName = JSON.parse(event.body).restaurantName
 
   const userEmail = _.get(event, 'requestContext.authorizer.claims.email')
@@ -45,4 +46,4 @@ module.exports.handler = async (event, context) => {
   }
 
   return response
-}
+})

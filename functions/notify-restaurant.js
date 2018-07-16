@@ -2,8 +2,9 @@ const { getRecords } = require('../lib/kinesis')
 const notify = require('../lib/notify')
 const retry = require('../lib/retry')
 const Log = require('../lib/log')
+const wrap = require('../lib/wrapper')
 
-module.exports.handler = async (event, context) => {
+module.exports.handler = wrap(async (event, context) => {
   const records = getRecords(event)
   const orderPlaced = records.filter(r => r.eventType === 'order_placed')
 
@@ -15,4 +16,4 @@ module.exports.handler = async (event, context) => {
       await retry.restaurantNotification(order)
     }
   }
-}
+})
