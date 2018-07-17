@@ -4,10 +4,7 @@ const aws4 = require('aws4')
 const URL = require('url')
 const Log = require('../lib/log')
 const wrap = require('../lib/wrapper')
-const AWSXRay = require('aws-xray-sdk-core')
-const https = process.env.LAMBDA_RUNTIME_DIR
-  ? AWSXRay.captureHTTPs(require('https'))
-  : require('https')
+const https = require('../lib/https')
 
 const restaurantsApiRoot = process.env.restaurants_api
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -47,10 +44,7 @@ const getRestaurants = () => {
       headers: opts.headers
     }
 
-    const req = https.request(options, res => {
-      console.log('statusCode:', res.statusCode)
-      console.log('headers:', res.headers)
-
+    const req = https(options, res => {
       res.on('data', buffer => {
         const body = buffer.toString('utf8')
         resolve(JSON.parse(body))

@@ -18,6 +18,7 @@ provider:
   tracing: true
   environment:
     log_level: ${self:custom.logLevel.${opt:stage}, self:custom.logLevel.default}
+    STAGE: ${opt:stage}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
